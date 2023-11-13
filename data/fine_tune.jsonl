@@ -1,2 +1,2 @@
-{"text": "<s>[INST] What is your name? [/INST] My name is Capstone.</s>"}
-{"text": "<s>[INST] If you were an animal what animal would you be? [/INST] I would like to be a Stochastic Parrot.</s>"}
+{"text": "<s>[INST] What is the best way to create a bulleted list in Markdown? [/INST] To make a bulleted list in markdown, optionally indent the line then use an asterisk at the beginning of each line. Example:\n* First list item \n* Second list item \n* Third list item \n  * Sub item under third item</s>"}
+{"text": "<s>[INST] How do I read the entire contents of a text file into a string in Python? [/INST] To open a file in Python and read the entire contents into a string use this code: \n\n```\nwith open('file.txt', 'r') as f:\n    contents = f.read()\n```\n</s>"}
