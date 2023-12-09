@@ -33,7 +33,7 @@ The UX should follow something like:
 * User asks a natural language question relevant to the documents.
 * The model may rephrase the question or extract important key words to then turn into embeddings.
 * Use the ChromaDB vector database.
-* Once we've retrieved relevant context documents, replay the users question with the documents or segments of the documents in the context window.
+* Once we've retrieved relevant context documents, reply to the users question with the documents or segments of the documents in the context window.
 
 Two stretch goals:
 

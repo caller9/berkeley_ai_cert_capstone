@@ -5,3 +5,5 @@ results/
 noterepo/
 corpus/
 db/
+openai.json
+hugging_face.json
