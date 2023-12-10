@@ -75,7 +75,7 @@ Here is a somewhat subjective comparison of the various models including their p
 
 To run this, you'll need a CUDA compatible GPU with 24GB VRAM or some experience in tuning the models to fit into less VRAM. You'll need almost all 24GB, so running a headless machine or using the integrated GPU for your desktop environment is a good idea if you aren't using a cloud VM.
 
-Run the `nvidia-smi` command to see allocated VRAM. Ideally this should be under 10MB with your kernels unloaded.
+Run the `nvidia-smi` command to see allocated VRAM. Ideally this should be under 10MB with your kernels unloaded. If it is a few hundred MB, you may be fine.
 
 Specs of the machine used for this process:
 ```
