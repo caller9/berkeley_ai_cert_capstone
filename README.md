@@ -1,19 +1,18 @@
 
-
 # Retrieval Augmented LLM Assistant
 
 **Adam Newman**
 
 ## Executive summary
 
-By using a LLM and a vector database, we should be able to allow users to have a conversational interface to talk to a document corpus. The user will have a natural language interface to a corpus of documents they have never seen before. The ML model will not to be retrained any time the documents change because updates to the vector database are immediately available for retrieval. Users should be able to find answers to their questions that are both factual and helpful without any special technical skills.
+By using a LLM and a vector database, we should be able to allow users to have a conversational interface to talk to a document corpus. The user will have a natural language interface to a corpus of documents they have never seen before. The ML model will not need to be retrained any time the documents change because updates to the vector database are immediately available for retrieval. Users should be able to find answers to their questions that are both factual and helpful without any special technical skills.
 
 ## Rationale
 
 There are several applications for natural language interfaces to a document corpus. Here are a few use cases that a system like this could provide:
 
 * Onboarding new-hires to a complex system more quickly. When a company's scattered documents can be accessed with an LLM's knack for summarization, the user can find the most relevant information and get on with their job.
-* On premise implementations. Many companies don't feel comfortable or legally cannot complaintly upload their documents into the cloud and want to unlock the power of LLMs for their on-premises hardware and data. When tools like these only index the public Internet or require uploading your data to their tool, these companies are left out.
+* On premise implementations. Many companies either don't feel comfortable or are legally prevented from uploading their documents into the cloud and want to unlock the power of LLMs for their on-premises hardware and data. When tools like these only index the public Internet or require uploading your data to their tool, these companies are left out.
 * Implementing private, conversational PKM (Personal Knowledge Management) systems. Individual users that take a lot of notes like daily journals or facts that are specific/important to them can't always find the notes after they've taken them. A tool that can aggregate notes across time and provide a more complete answer could provide a "second brain" for these people.
 
 ## Research Questions
@@ -43,39 +42,51 @@ The UX should follow something like:
 ## Results
 * Loading a corpus of notes into a vector database is a very effective way to provide context for an LLM.
 * Requests without the aid of the vector database gave generic answers from the original training data. When given a corpus of notes to frame the response and a vector database, the models performed better at providing specific information in the response.
-* The LoRA fine tuning works. You'll need a decent sized training set of example interactions to tune the baseline model from a generic prediction mode into a chat bot. Using small training sets tends to bias the fine tuned model to memorize exact training examples and reply with them even when they're out of context.
+* The LoRA fine tuning works, but you'll need quality training data. It requires a decent sized training set of example interactions to tune the baseline model from a generic prediction mode into a chat bot. Using small training sets tends to bias the fine tuned model to memorize exact training examples and reply with them even when they're out of context.
+* An off the shelf model that is already instruction tuned may be the easiest approach for use with RAG where the summarization behavior is the most important.
 
 ### Comparison of models
 Here is a somewhat subjective comparison of the various models including their performance both without RAG (Retrieval-Augmented Generation) and with RAG for some sample queries.
 
 | Model | Inference Time (s) | Non-RAG Quality | RAG Quality | Context Window | CapEx | OpEx |
 |--|--|--|--|--|--|--|
-|Locally Tuned |  | C | D | E | $$$$ | $ |
-|Mistral-7B-Instruct | 4 - 18 | 3/5 | 2/5 | E | $$$ | $ |
-|Llama-2-7B-Chat | 12 - 15 | 3/5 | 4/5 | E | $$$ | $ |
-|GPT 3.5 Turbo | 8 - 9 | 3.5/5 | 4/5 | E | 0 | $$ |
-|GPT 4 Turbo | 42 - 51 | 4.5/5 | 5/5 | E | 0 | $$$ |
+|Mistral-7B | N/A | 1/5 | 0/5 | 8K | $$$ | $ |
+|Mistral-7B Locally Tuned | 20 - 21 | 2/5 | 2.5/5 | 8K | $$$$ | $ |
+|Mistral-7B-Instruct | 4 - 18 | 3/5 | 2/5 | 8K | $$$ | $ |
+|Llama-2-7B-Chat | 12 - 15 | 3/5 | 4/5 | 4K | $$$ | $ |
+|GPT 3.5 Turbo | 8 - 9 | 3.5/5 | 4/5 | 16K | 0 | $$ |
+|GPT 4 Turbo | 42 - 51 | 4.5/5 | 5/5 | 128K?! | 0 | $$$ |
 
 * Inference Time - Based on the two example RAG queries, this was the range of time each took.
 * Non-RAG Quality - Without access to the corpus, how well did it explain how to loop a GIF? The more options or depth in the answer, the better.
 * RAG Quality - How well did it adhere to the source data when providing the answer? Did it summarize the source well or just pull from its original training? Alternatively did it provide no summarization and show memorized content?
 * Context Window - The size of the model's context window in tokens. A larger context window allows for more documents to be input.
 * CapEx - Capital expenditure or how much you must spend before getting started. If you're buying your own hardware, there is a large one time up-front cost. The training run also uses quite a bit of energy up front.
-* OpEx - Operational cost per inference operation. If you're using cloud GPU or SaaS with per-token inference costs, OpEx is a bit higher. If you're using a local GPU, then you're only paying for electricity.  However, for business use, you will need staff to maintain and upgrade your hardware, redundant infra, etc. so on-prem hardware is never a one time cost.
+	* You will be limited to 1 simultaneous operation per GPU so scaling can get cost prohibitive if you're scaling out with on premises equipment.
+* OpEx - Operational cost per inference operation. If you're using cloud GPU or SaaS with per-token inference costs, OpEx is a bit higher. If you're using a local GPU, then you're only paying for electricity.  
+	* However, for business use, you will need staff to maintain and upgrade your hardware, patches, config management, redundant infra, etc. so on-prem hardware is rarely a one time cost.
 
-### Best Model
+### Best Models
 
+* The best model overall for RAG was GPT 4 Turbo. Naturally this is a huge, state of the art model tuned by experts so it should be expected to perform well.
+   * It is the most expensive per inference at $.01 / 1K tokens in and $.03 / 1K tokens out. If you consider a token is approximately one word then use for RAG with large documents and verbose output could get expensive. 
+   * It is the the slowest performing at least 2x as slow as any local model or API for inference. This is the preview version, so I expect that could improve over time.
+   * It has a huge context window.
+   * One step down in quality to GPT 3.5 Turbo bills at a much lower $.001 / 1K tokens in and $.002 / 1K tokens out. It's also much faster.
+* The best local model for RAG was Llama-2-7B-Chat. It was average for speed, but produced decent results without losing the context of the retrieved documents.
+	* This model is free within limits set by Meta so the inference cost is down to your hardware operation costs.
 
 ## Next steps
 
-* Determine the minimum `distance` score for a relevant document and exclude documents out of that range. Mention that in the result and provide a best effort answer from the corpus. Providing an arbitrary document that isn't very related to the question isn't useful.
+* Determine the maximum `distance` score for a relevant document and exclude documents out of that range. Mention the lack of documents in the result and provide a best effort answer from the corpus. Providing an arbitrary document that isn't very related to the question isn't useful.
 * Reuse the response in the context window for follow up questions.
+* Create a custom fine-tuning dataset that performs summarization of example documents. By creating a purpose-tuned model for RAG, we could get better application-specific results.
 
 ## Outline of project
 
 To run this, you'll need a CUDA compatible GPU with 24GB VRAM or some experience in tuning the models to fit into less VRAM. You'll need almost all 24GB, so running a headless machine or using the integrated GPU for your desktop environment is a good idea if you aren't using a cloud VM.
 
-Run the `nvidia-smi` command to see allocated VRAM. Ideally this should be under 10MB with your kernels unloaded. If it is a few hundred MB, you may be fine.
+Run the `nvidia-smi` command to see allocated VRAM. Ideally this should be under 10MB with your kernels unloaded. If it is a few hundred MB, you may still be fine.
 
 Specs of the machine used for this process:
 ```
@@ -92,7 +103,8 @@ Installing CUDA drivers are out of scope for this project and system/card depend
 
 Python setup:
 ```bash
-# You don't have to create a virtual environment, but I highly recommend it to prevent polluting your global setup.
+# You don't have to create a virtual environment, but I highly recommend it
+# to prevent polluting your global setup.
 python3 -m venv jupyter
 jupyter/bin/pip install nltk matplotlib chromadb scikit-learn \
   InstructorEmbedding sentence_transformers peft datasets wandb \
