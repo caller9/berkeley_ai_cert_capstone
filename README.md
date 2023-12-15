@@ -42,7 +42,9 @@ The UX should follow something like:
 ## Results
 * Loading a corpus of notes into a vector database is a very effective way to provide context for an LLM.
 * Requests without the aid of the vector database gave generic answers from the original training data. When given a corpus of notes to frame the response and a vector database, the models performed better at providing specific information in the response.
-* The LoRA fine tuning works, but you'll need quality training data. It requires a decent sized training set of example interactions to tune the baseline model from a generic prediction mode into a chat bot. Using small training sets tends to bias the fine tuned model to memorize exact training examples and reply with them even when they're out of context.
+* The LoRA fine tuning works, but you'll need quality training data.
+  * It requires a decent sized training set of example interactions to tune the baseline model from a generic prediction mode into a chat bot. Using small training sets tends to bias the fine tuned model to memorize exact training examples and reply with them even when they're out of context.
+  * Before fine tuning the model with the assistant training dataset it refused to summarize documents and was a bit more chaotic with its answers. It was trying to complete a document, not participate in a conversation.
 * An off the shelf model that is already instruction tuned may be the easiest approach for use with RAG where the summarization behavior is the most important.
 
 ### Comparison of models
@@ -117,7 +119,7 @@ jupyter/bin/pip install nltk matplotlib chromadb scikit-learn \
 
 1. [Load Vector Database](load_vector_database.ipynb) - This populates the local vector database with the document corpus. This step is mandatory.
 1. [Fine Tuning](fine_tune.ipynb) - Performs local fine tuning based on the `data/fine_tune.json` file. This takes hours to complete and will produce a locally fine tuned model. You may skip this if you don't want to run the `retrieval_augmented_chat_mistral_tuned.ipynb` notebook.
-1. [Create Fine Tuning Data](fine_tune_ganaco.ipynb) - You can skip this notebook. This will regenerate the `data/fine_tune.json` based on data from [openassistant-ganaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco). 
+1. [Create Fine Tuning Data](fine_tune_ganaco.ipynb) - You can skip this notebook. This will regenerate the `data/fine_tune.json` based on data from [openassistant-ganaco](https://huggingface.co/datasets/timdettmers/openassistant-guanaco). There are some important tips and procedures in here if you're going to create your own or adapt different training data. 
 
 ### Primary notebooks:
 
